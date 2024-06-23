@@ -14,13 +14,25 @@ public class FilesService implements IFilesService {
 
     @Override
     public void guardarArchivo(MultipartFile archivo) throws Exception {
-        Files.copy(archivo.getInputStream(), this.pathFolder.resolve(archivo.getOriginalFilename()));
+        String fileName = archivo.getOriginalFilename();
+        if (!isValidExtension(fileName)) {
+            throw new IllegalArgumentException("Extensión inválida en archivo: " + fileName);
+        }
+        Files.copy(archivo.getInputStream(), this.pathFolder.resolve(fileName));
     }
 
     @Override
     public void guardarArchivos(List<MultipartFile> archivoList) throws Exception {
-        for(MultipartFile archivo : archivoList){
+        if (archivoList.size() != 3) {
+            throw new IllegalArgumentException("Son requeridos 3 archivos");
+        }
+
+        for (MultipartFile archivo : archivoList) {
             this.guardarArchivo(archivo);
         }
+    }
+    private boolean isValidExtension(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        return extension.equals("pdf") || extension.equals("png") || extension.equals("docx");
     }
 }
